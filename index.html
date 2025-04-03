@@ -127,6 +127,14 @@
         function addToInput(character) {
             const inputField = document.getElementById("text-input");
             inputField.value += character; // Add the Braille character to the input area
+            vibrateFeedback(); // Call function to trigger vibration
+        }
+
+        function vibrateFeedback() {
+            // Trigger a vibration for each keypress
+            if ("vibrate" in navigator) {
+                navigator.vibrate(100); // 100ms vibration duration
+            }
         }
 
         function convertToBraille() {
