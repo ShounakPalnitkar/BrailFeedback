@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Braille Feedback System - Accessible Version</title>
+    <style>
+        .braille-cell {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            margin: 5px;
+            display: inline-block;
+            background-color: #D3D3D3;
+            transition: background-color 0.3s ease;
+        }
+        .braille-cell.on {
+            background-color: #000;
+        }
+        .braille-line {
+            display: flex;
+        }
+        #braille-output {
+            margin-top: 20px;
+            border: 1px solid #ccc;
+            padding: 10px;
+            min-height: 60px;
+        }
+        #text-input {
+            padding: 8px;
+            font-size: 16px;
+        }
+        button {
+            padding: 10px 15px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border-width: 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Smart Braille Feedback System</h1>
+    <div id="live-region" aria-live="polite" class="sr-only"></div>
+    
+    <label for="text-input" id="input-label" class="sr-only">Enter text to convert to Braille</label>
+    <textarea id="text-input" aria-labelledby="input-label" placeholder="Enter text to convert to Braille" rows="4" cols="50"></textarea><br><br>
+    
+    <button id="convert-btn" onclick="convertToBraille()" onkeydown="if (event.key === 'Enter') convertToBraille()">
+        Convert to Braille
+    </button>
+    <button id="speak-btn" onclick="speakInput()" onkeydown="if (event.key === 'Enter') speakInput()">
+        Speak Text
+    </button><br><br>
+    
+    <div id="braille-output" aria-live="polite" role="region" aria-label="Braille Output"></div>
+
+    <script>
+        // Braille alphabet dictionary (expanded with numbers and basic punctuation)
+        const brailleAlphabet = {
+            // Lowercase letters a-z (same as before)
+            "a": [1, 0, 0, 0, 0, 0], "b": [1, 1, 0, 0, 0, 0], "c": [1, 0, 0, 1, 0, 0],
+            "d": [1, 0, 0, 1, 1, 0], "e": [1, 0, 0, 0, 1, 0], "f": [1, 1, 0, 1, 0, 0],
+            "g": [1, 1, 0, 1, 1, 0], "h": [1, 1, 0, 0, 1, 0], "i": [0, 1, 0, 1, 0, 0],
+            "j": [0, 1, 0, 1, 1, 0], "k": [1, 0, 1, 0, 0, 0], "l": [1, 1, 1, 0, 0, 0],
+            "m": [1, 0, 1, 1, 0, 0], "n": [1, 0, 1, 1, 1, 0], "o": [1, 0, 1, 0, 1, 0],
+            "p": [1, 1, 1, 1, 0, 0], "q": [1, 1, 1, 1, 1, 0], "r": [1, 1, 1, 0, 1, 0],
+            "s": [0, 1, 1, 1, 0, 0], "t": [0, 1, 1, 1, 1, 0], "u": [1, 0, 1, 0, 0, 1],
+            "v": [1, 1, 1, 0, 0, 1], "w": [0, 1, 0, 1, 1, 1], "x": [1, 0, 1, 1, 0, 1],
+            "y": [1, 0, 1, 1, 1, 1], "z": [1, 0, 1, 0, 1, 1],
+            
+            // Numbers (prefixed with number sign ⠼)
+            "0": [0, 1, 0, 1, 1, 0], "1": [1, 0, 0, 0, 0, 0], "2": [1, 1, 0, 0, 0, 0],
+            "3": [1, 0, 0, 1, 0, 0], "4": [1, 0, 0, 1, 1, 0], "5": [1, 0, 0, 0, 1, 0],
+            "6": [1, 1, 0, 1, 0, 0], "7": [1, 1, 0, 1, 1, 0], "8": [1, 1, 0, 0, 1, 0],
+            "9": [0, 1, 0, 1, 0, 0],
+            
+            // Basic punctuation
+            ".": [0, 0, 1, 0, 0, 1], ",": [0, 0, 1, 0, 0, 0], "?": [0, 0, 1, 1, 0, 1],
+            "!": [0, 0, 1, 1, 0, 0], "'": [0, 0, 0, 0, 1, 0], "-": [0, 0, 1, 0, 0, 1],
+            " ": [0, 0, 0, 0, 0, 0]  // Space
+        };
+
+        // Function to convert text to Braille
+        function convertToBraille() {
+            const inputText = document.getElementById("text-input").value.toLowerCase();
+            let brailleHTML = "";
+            let description = "Braille output: ";
+            
+            // Focus on output for screen readers
+            document.getElementById("braille-output").focus();
+
+            for (let char of inputText) {
+                if (brailleAlphabet[char]) {
+                    brailleHTML += `<div class="braille-line">`;
+                    brailleAlphabet[char].forEach(dot => {
+                        brailleHTML += `<div class="braille-cell ${dot ? 'on' : ''}"></div>`;
+                    });
+                    brailleHTML += `</div>`;
+                    description += `${char} `;
+                } else if (char === ' ') {
+                    brailleHTML += `<div class="braille-line"><div class="braille-cell" style="background-color: transparent;"></div></div>`;
+                    description += "space ";
+                }
+            }
+
+            document.getElementById("braille-output").innerHTML = brailleHTML;
+            updateLiveRegion(description);
+            
+            // Add vibration feedback if supported
+            if (navigator.vibrate) {
+                vibrateFeedback(inputText);
+            }
+        }
+
+        // Function to update screen reader announcement
+        function updateLiveRegion(message) {
+            const liveRegion = document.getElementById("live-region");
+            liveRegion.textContent = message;
+            setTimeout(() => {
+                liveRegion.textContent = ''; // Clear after announcement
+            }, 100);
+        }
+
+        // Function to speak the input text
+        function speakInput() {
+            const inputText = document.getElementById("text-input").value;
+            if (inputText.trim() === '') {
+                updateLiveRegion("Please enter some text first");
+                return;
+            }
+            
+            if ('speechSynthesis' in window) {
+                const utterance = new SpeechSynthesisUtterance(inputText);
+                utterance.lang = 'en-US';
+                window.speechSynthesis.speak(utterance);
+                updateLiveRegion("Speaking: " + inputText);
+            } else {
+                updateLiveRegion("Text-to-speech not supported in your browser");
+            }
+        }
+
+        // Function to provide vibration feedback
+        function vibrateFeedback(text) {
+            const pattern = [];
+            
+            for (let char of text.toLowerCase()) {
+                if (brailleAlphabet[char]) {
+                    // Add vibration for each dot in the Braille character
+                    brailleAlphabet[char].forEach(dot => {
+                        pattern.push(dot ? 100 : 30); // 100ms for raised dot, 30ms for flat
+                        pattern.push(30); // Short pause between dots
+                    });
+                    pattern.push(150); // Longer pause between characters
+                } else if (char === ' ') {
+                    pattern.push(0, 300); // Long pause for space
+                }
+            }
+            
+            navigator.vibrate(pattern);
+        }
+
+        // Initialize with focus on text input
+        window.onload = function() {
+            document.getElementById("text-input").focus();
+        };
+    </script>
+</body>
+</html>
