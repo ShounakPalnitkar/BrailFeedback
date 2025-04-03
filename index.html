@@ -185,7 +185,7 @@
                 <div class="braille-key" data-char="y">⠽</div>
                 <div class="braille-key" data-char="z">⠵</div>
                 <div class="braille-key space-key" data-char=" ">Space</div>
-                <div class="braille-key function-key" id="speak">Speak</div>
+                <!-- Removed Speak Button -->
             </div>
         </div>
         
@@ -238,7 +238,6 @@
         const clearBtn = document.getElementById('clear');
         const convertBrailleBtn = document.getElementById('convert-braille');
         const convertTextBtn = document.getElementById('convert-text');
-        const speakBtn = document.getElementById('speak');
 
         // Add event listeners
         keys.forEach(key => {
@@ -250,7 +249,6 @@
         clearBtn.addEventListener('click', clearInput);
         convertBrailleBtn.addEventListener('click', convertToBraille);
         convertTextBtn.addEventListener('click', convertToText);
-        speakBtn.addEventListener('click', speakText);
 
         // Prevent default touch behavior to avoid delays
         document.addEventListener('touchstart', function(e) {
@@ -268,7 +266,6 @@
         function addToInput(char) {
             textInput.value += char;
             vibrateFeedback();
-            speakCharacter(char);
         }
 
         function backspace() {
@@ -286,16 +283,6 @@
         function vibrateFeedback() {
             if ("vibrate" in navigator) {
                 navigator.vibrate(30);
-            }
-        }
-
-        function speakCharacter(char) {
-            if ('speechSynthesis' in window) {
-                const utterance = new SpeechSynthesisUtterance();
-                utterance.text = char === ' ' ? 'space' : char;
-                utterance.volume = 1;
-                utterance.rate = 0.8;
-                speechSynthesis.speak(utterance);
             }
         }
 
@@ -344,17 +331,6 @@
             }
 
             textOutput.textContent = englishText;
-            vibrateFeedback();
-        }
-
-        function speakText() {
-            const textToSpeak = textOutput.textContent || textInput.value;
-            if ('speechSynthesis' in window && textToSpeak) {
-                const utterance = new SpeechSynthesisUtterance(textToSpeak);
-                utterance.volume = 1;
-                utterance.rate = 0.8;
-                speechSynthesis.speak(utterance);
-            }
             vibrateFeedback();
         }
     </script>
