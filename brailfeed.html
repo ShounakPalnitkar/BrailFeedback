@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Braille Feedback System</title>
+    <style>
+        .braille-cell {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            margin: 5px;
+            display: inline-block;
+            background-color: #D3D3D3;
+            transition: background-color 0.3s ease;
+        }
+        .braille-cell.on {
+            background-color: #000;
+        }
+        .braille-line {
+            display: flex;
+        }
+        #braille-output {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Smart Braille Feedback System</h1>
+    <textarea id="text-input" placeholder="Enter text to convert to Braille" rows="4" cols="50"></textarea><br><br>
+    <button onclick="convertToBraille()">Convert to Braille</button><br><br>
+    <div id="braille-output"></div>
+
+    <script>
+        // Braille alphabet dictionary (simplified)
+        const brailleAlphabet = {
+            "a": [1, 0, 0, 0, 0, 0],
+            "b": [1, 1, 0, 0, 0, 0],
+            "c": [1, 0, 0, 1, 0, 0],
+            "d": [1, 0, 0, 1, 1, 0],
+            "e": [1, 0, 0, 0, 1, 0],
+            "f": [1, 1, 0, 1, 0, 0],
+            "g": [1, 1, 0, 1, 1, 0],
+            "h": [1, 1, 0, 0, 1, 0],
+            "i": [0, 1, 0, 1, 0, 0],
+            "j": [0, 1, 0, 1, 1, 0],
+            "k": [1, 0, 1, 0, 0, 0],
+            "l": [1, 1, 1, 0, 0, 0],
+            "m": [1, 0, 1, 1, 0, 0],
+            "n": [1, 0, 1, 1, 1, 0],
+            "o": [1, 0, 1, 0, 1, 0],
+            "p": [1, 1, 1, 1, 0, 0],
+            "q": [1, 1, 1, 1, 1, 0],
+            "r": [1, 1, 1, 0, 1, 0],
+            "s": [0, 1, 1, 1, 0, 0],
+            "t": [0, 1, 1, 1, 1, 0],
+            "u": [1, 0, 1, 0, 0, 1],
+            "v": [1, 1, 1, 0, 0, 1],
+            "w": [0, 1, 0, 1, 1, 1],
+            "x": [1, 0, 1, 1, 0, 1],
+            "y": [1, 0, 1, 1, 1, 1],
+            "z": [1, 0, 1, 0, 1, 1]
+        };
+
+        // Function to convert text to Braille
+        function convertToBraille() {
+            const inputText = document.getElementById("text-input").value.toLowerCase();
+            let brailleHTML = "";
+
+            for (let char of inputText) {
+                if (brailleAlphabet[char]) {
+                    brailleHTML += `<div class="braille-line">`;
+                    brailleAlphabet[char].forEach(dot => {
+                        brailleHTML += `<div class="braille-cell ${dot ? 'on' : ''}"></div>`;
+                    });
+                    brailleHTML += `</div>`;
+                } else if (char === ' ') {
+                    // Add space between words
+                    brailleHTML += `<div class="braille-line"><div class="braille-cell" style="background-color: transparent;"></div></div>`;
+                }
+            }
+
+            document.getElementById("braille-output").innerHTML = brailleHTML;
+        }
+    </script>
+</body>
+</html>
