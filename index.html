@@ -134,14 +134,22 @@
         // Function to speak the input text
         function speakInput() {
             const inputText = document.getElementById("text-input").value;
+            
+            // Debugging log to check the input text
+            console.log("Input Text:", inputText);
+            
             if (inputText.trim() === '') {
                 updateLiveRegion("Please enter some text first");
                 return;
             }
-            
+
             if ('speechSynthesis' in window) {
                 const utterance = new SpeechSynthesisUtterance(inputText);
                 utterance.lang = 'en-US';
+                
+                // Debugging log to check utterance properties
+                console.log("Utterance:", utterance);
+                
                 window.speechSynthesis.speak(utterance);
                 updateLiveRegion("Speaking: " + inputText);
             } else {
