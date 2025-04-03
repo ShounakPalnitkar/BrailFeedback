@@ -2,115 +2,206 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart Braille Feedback System - Braille Keyboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Mobile Braille Keyboard</title>
     <style>
-        .braille-cell {
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            margin: 5px;
-            display: inline-block;
-            background-color: #D3D3D3;
-            transition: background-color 0.3s ease;
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
         }
-        .braille-cell.on {
-            background-color: #000;
-        }
-        .braille-line {
-            display: flex;
-        }
-        .braille-key {
-            width: 40px;
-            height: 40px;
-            margin: 10px;
-            display: inline-block;
-            background-color: #D3D3D3;
-            border-radius: 5px;
-            text-align: center;
-            line-height: 40px;
-            font-size: 18px;
-            cursor: pointer;
-            transition: background-color 0.2s ease;
-        }
-        .braille-key:hover {
-            background-color: #B0B0B0;
-        }
-        .braille-key:active {
-            background-color: #7F7F7F;
-        }
-        #braille-output {
-            margin-top: 20px;
-            border: 1px solid #ccc;
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
             padding: 10px;
-            min-height: 60px;
+            background-color: #f5f5f5;
+            touch-action: manipulation;
+        }
+        .container {
+            max-width: 100%;
+            margin: 0 auto;
+        }
+        h1 {
+            text-align: center;
+            font-size: 1.5rem;
+            color: #333;
         }
         #text-input {
-            padding: 8px;
+            width: 100%;
+            padding: 12px;
             font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            background-color: white;
+            min-height: 100px;
         }
-        button {
-            padding: 10px 15px;
-            font-size: 16px;
+        .keyboard-container {
+            background-color: #e0e0e0;
+            border-radius: 10px;
+            padding: 10px;
+            margin-bottom: 15px;
+        }
+        .braille-keyboard {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+        }
+        .braille-key {
+            background-color: #fff;
+            border-radius: 8px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
             cursor: pointer;
+            user-select: none;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: all 0.1s;
+            touch-action: manipulation;
         }
-        .sr-only {
-            position: absolute;
-            width: 1px;
-            height: 1px;
-            padding: 0;
-            margin: -1px;
-            overflow: hidden;
-            clip: rect(0, 0, 0, 0);
-            white-space: nowrap;
-            border-width: 0;
+        .braille-key:active {
+            background-color: #ddd;
+            transform: scale(0.95);
+        }
+        .function-key {
+            background-color: #4a90e2;
+            color: white;
+            font-size: 18px;
+        }
+        .space-key {
+            grid-column: span 2;
+            background-color: #f0f0f0;
+            font-size: 16px;
+        }
+        .backspace-key {
+            background-color: #e74c3c;
+            color: white;
+        }
+        .output-section {
+            background-color: white;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .output-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #333;
+        }
+        .braille-dots {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .braille-cell {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background-color: #333;
+            opacity: 0.2;
+        }
+        .braille-cell.on {
+            opacity: 1;
+            background-color: #000;
+        }
+        .braille-character {
+            margin-right: 15px;
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .braille-dot-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            margin-bottom: 5px;
+        }
+        #text-output {
+            font-size: 18px;
+            min-height: 30px;
+            word-wrap: break-word;
+        }
+        @media (max-width: 400px) {
+            .braille-key {
+                height: 50px;
+                font-size: 20px;
+            }
         }
     </style>
 </head>
 <body>
-    <h1>Smart Braille Feedback System - Braille Keyboard</h1>
-    <div id="live-region" aria-live="polite" class="sr-only"></div>
-
-    <label for="text-input" id="input-label" class="sr-only">Enter text to convert to Braille</label>
-    <textarea id="text-input" aria-labelledby="input-label" placeholder="Enter text to convert to Braille" rows="4" cols="50" readonly></textarea><br><br>
-    
-    <div id="braille-keyboard">
-        <!-- Braille Keys -->
-        <div class="braille-key" onclick="addToInput('a')">⠁</div>
-        <div class="braille-key" onclick="addToInput('b')">⠃</div>
-        <div class="braille-key" onclick="addToInput('c')">⠉</div>
-        <div class="braille-key" onclick="addToInput('d')">⠙</div>
-        <div class="braille-key" onclick="addToInput('e')">⠑</div>
-        <div class="braille-key" onclick="addToInput('f')">⠋</div>
-        <div class="braille-key" onclick="addToInput('g')">⠛</div>
-        <div class="braille-key" onclick="addToInput('h')">⠓</div>
-        <div class="braille-key" onclick="addToInput('i')">⠊</div>
-        <div class="braille-key" onclick="addToInput('j')">⠚</div>
-        <div class="braille-key" onclick="addToInput('k')">⠅</div>
-        <div class="braille-key" onclick="addToInput('l')">⠇</div>
-        <div class="braille-key" onclick="addToInput('m')">⠍</div>
-        <div class="braille-key" onclick="addToInput('n')">⠝</div>
-        <div class="braille-key" onclick="addToInput('o')">⠕</div>
-        <div class="braille-key" onclick="addToInput('p')">⠏</div>
-        <div class="braille-key" onclick="addToInput('q')">⠟</div>
-        <div class="braille-key" onclick="addToInput('r')">⠗</div>
-        <div class="braille-key" onclick="addToInput('s')">⠎</div>
-        <div class="braille-key" onclick="addToInput('t')">⠞</div>
-        <div class="braille-key" onclick="addToInput('u')">⠥</div>
-        <div class="braille-key" onclick="addToInput('v')">⠧</div>
-        <div class="braille-key" onclick="addToInput('w')">⠺</div>
-        <div class="braille-key" onclick="addToInput('x')">⠭</div>
-        <div class="braille-key" onclick="addToInput('y')">⠽</div>
-        <div class="braille-key" onclick="addToInput('z')">⠵</div>
-        <div class="braille-key" onclick="addToInput(' ')">⠠</div>
-    </div><br><br>
-    
-    <button id="convert-btn" onclick="convertToBraille()">Convert to Braille</button><br><br>
-    
-    <div id="braille-output" aria-live="polite" role="region" aria-label="Braille Output"></div>
+    <div class="container">
+        <h1>Mobile Braille Keyboard</h1>
+        
+        <textarea id="text-input" placeholder="Braille input will appear here" readonly></textarea>
+        
+        <div class="keyboard-container">
+            <div class="braille-keyboard">
+                <!-- First Row -->
+                <div class="braille-key" data-char="a">⠁</div>
+                <div class="braille-key" data-char="b">⠃</div>
+                <div class="braille-key" data-char="c">⠉</div>
+                <div class="braille-key function-key" id="backspace">⌫</div>
+                
+                <!-- Second Row -->
+                <div class="braille-key" data-char="d">⠙</div>
+                <div class="braille-key" data-char="e">⠑</div>
+                <div class="braille-key" data-char="f">⠋</div>
+                <div class="braille-key function-key" id="clear">Clear</div>
+                
+                <!-- Third Row -->
+                <div class="braille-key" data-char="g">⠛</div>
+                <div class="braille-key" data-char="h">⠓</div>
+                <div class="braille-key" data-char="i">⠊</div>
+                <div class="braille-key function-key" id="convert-braille">Show Dots</div>
+                
+                <!-- Fourth Row -->
+                <div class="braille-key" data-char="j">⠚</div>
+                <div class="braille-key" data-char="k">⠅</div>
+                <div class="braille-key" data-char="l">⠇</div>
+                <div class="braille-key function-key" id="convert-text">To Text</div>
+                
+                <!-- Fifth Row -->
+                <div class="braille-key" data-char="m">⠍</div>
+                <div class="braille-key" data-char="n">⠝</div>
+                <div class="braille-key" data-char="o">⠕</div>
+                <div class="braille-key" data-char="p">⠏</div>
+                
+                <!-- Sixth Row -->
+                <div class="braille-key" data-char="q">⠟</div>
+                <div class="braille-key" data-char="r">⠗</div>
+                <div class="braille-key" data-char="s">⠎</div>
+                <div class="braille-key" data-char="t">⠞</div>
+                
+                <!-- Seventh Row -->
+                <div class="braille-key" data-char="u">⠥</div>
+                <div class="braille-key" data-char="v">⠧</div>
+                <div class="braille-key" data-char="w">⠺</div>
+                <div class="braille-key" data-char="x">⠭</div>
+                
+                <!-- Eighth Row -->
+                <div class="braille-key" data-char="y">⠽</div>
+                <div class="braille-key" data-char="z">⠵</div>
+                <div class="braille-key space-key" data-char=" ">Space</div>
+                <div class="braille-key function-key" id="speak">Speak</div>
+            </div>
+        </div>
+        
+        <div class="output-section">
+            <div class="output-title">Braille Dots Representation</div>
+            <div id="braille-output" class="braille-dots"></div>
+        </div>
+        
+        <div class="output-section">
+            <div class="output-title">English Text Output</div>
+            <div id="text-output"></div>
+        </div>
+    </div>
 
     <script>
-        // Braille alphabet dictionary (only lowercase letters and space for simplicity)
+        // Braille alphabet dictionary
         const brailleAlphabet = {
             "a": [1, 0, 0, 0, 0, 0], "b": [1, 1, 0, 0, 0, 0], "c": [1, 0, 0, 1, 0, 0],
             "d": [1, 0, 0, 1, 1, 0], "e": [1, 0, 0, 0, 1, 0], "f": [1, 1, 0, 1, 0, 0],
@@ -124,34 +215,147 @@
             " ": [0, 0, 0, 0, 0, 0]
         };
 
-        function addToInput(character) {
-            const inputField = document.getElementById("text-input");
-            inputField.value += character; // Add the Braille character to the input area
-            vibrateFeedback(); // Call function to trigger vibration
+        // Reverse mapping for Braille to English
+        const brailleToEnglish = {
+            "1,0,0,0,0,0": "a", "1,1,0,0,0,0": "b", "1,0,0,1,0,0": "c",
+            "1,0,0,1,1,0": "d", "1,0,0,0,1,0": "e", "1,1,0,1,0,0": "f",
+            "1,1,0,1,1,0": "g", "1,1,0,0,1,0": "h", "0,1,0,1,0,0": "i",
+            "0,1,0,1,1,0": "j", "1,0,1,0,0,0": "k", "1,1,1,0,0,0": "l",
+            "1,0,1,1,0,0": "m", "1,0,1,1,1,0": "n", "1,0,1,0,1,0": "o",
+            "1,1,1,1,0,0": "p", "1,1,1,1,1,0": "q", "1,1,1,0,1,0": "r",
+            "0,1,1,1,0,0": "s", "0,1,1,1,1,0": "t", "1,0,1,0,0,1": "u",
+            "1,1,1,0,0,1": "v", "0,1,0,1,1,1": "w", "1,0,1,1,0,1": "x",
+            "1,0,1,1,1,1": "y", "1,0,1,0,1,1": "z",
+            "0,0,0,0,0,0": " "
+        };
+
+        // DOM elements
+        const textInput = document.getElementById('text-input');
+        const brailleOutput = document.getElementById('braille-output');
+        const textOutput = document.getElementById('text-output');
+        const keys = document.querySelectorAll('.braille-key[data-char]');
+        const backspaceBtn = document.getElementById('backspace');
+        const clearBtn = document.getElementById('clear');
+        const convertBrailleBtn = document.getElementById('convert-braille');
+        const convertTextBtn = document.getElementById('convert-text');
+        const speakBtn = document.getElementById('speak');
+
+        // Add event listeners
+        keys.forEach(key => {
+            key.addEventListener('touchstart', handleKeyPress, {passive: true});
+            key.addEventListener('click', handleKeyPress);
+        });
+
+        backspaceBtn.addEventListener('click', backspace);
+        clearBtn.addEventListener('click', clearInput);
+        convertBrailleBtn.addEventListener('click', convertToBraille);
+        convertTextBtn.addEventListener('click', convertToText);
+        speakBtn.addEventListener('click', speakText);
+
+        // Prevent default touch behavior to avoid delays
+        document.addEventListener('touchstart', function(e) {
+            if (e.target.classList.contains('braille-key')) {
+                e.preventDefault();
+            }
+        }, {passive: false});
+
+        function handleKeyPress(e) {
+            e.preventDefault();
+            const char = this.getAttribute('data-char');
+            addToInput(char);
+        }
+
+        function addToInput(char) {
+            textInput.value += char;
+            vibrateFeedback();
+            speakCharacter(char);
+        }
+
+        function backspace() {
+            textInput.value = textInput.value.slice(0, -1);
+            vibrateFeedback();
+        }
+
+        function clearInput() {
+            textInput.value = '';
+            brailleOutput.innerHTML = '';
+            textOutput.textContent = '';
+            vibrateFeedback();
         }
 
         function vibrateFeedback() {
-            // Trigger a vibration for each keypress
             if ("vibrate" in navigator) {
-                navigator.vibrate(100); // 100ms vibration duration
+                navigator.vibrate(30);
+            }
+        }
+
+        function speakCharacter(char) {
+            if ('speechSynthesis' in window) {
+                const utterance = new SpeechSynthesisUtterance();
+                utterance.text = char === ' ' ? 'space' : char;
+                utterance.volume = 1;
+                utterance.rate = 0.8;
+                speechSynthesis.speak(utterance);
             }
         }
 
         function convertToBraille() {
-            const inputText = document.getElementById("text-input").value.toLowerCase();
-            let brailleHTML = "";
+            const inputText = textInput.value.toLowerCase();
+            brailleOutput.innerHTML = '';
+            
+            for (let char of inputText) {
+                if (brailleAlphabet[char]) {
+                    const charDiv = document.createElement('div');
+                    charDiv.className = 'braille-character';
+                    
+                    const dotGrid = document.createElement('div');
+                    dotGrid.className = 'braille-dot-grid';
+                    
+                    // Create 6 dots (2 columns, 3 rows)
+                    for (let i = 0; i < 6; i++) {
+                        const dot = document.createElement('div');
+                        dot.className = 'braille-cell';
+                        if (brailleAlphabet[char][i]) {
+                            dot.classList.add('on');
+                        }
+                        dotGrid.appendChild(dot);
+                    }
+                    
+                    charDiv.appendChild(dotGrid);
+                    charDiv.appendChild(document.createTextNode(char.toUpperCase()));
+                    brailleOutput.appendChild(charDiv);
+                }
+            }
+            
+            vibrateFeedback();
+        }
+
+        function convertToText() {
+            const inputText = textInput.value.toLowerCase();
+            let englishText = '';
 
             for (let char of inputText) {
                 if (brailleAlphabet[char]) {
-                    brailleHTML += `<div class="braille-line">`;
-                    brailleAlphabet[char].forEach(dot => {
-                        brailleHTML += `<div class="braille-cell ${dot ? 'on' : ''}"></div>`;
-                    });
-                    brailleHTML += `</div>`;
+                    const dotPattern = brailleAlphabet[char].toString();
+                    if (brailleToEnglish[dotPattern]) {
+                        englishText += brailleToEnglish[dotPattern];
+                    }
                 }
             }
 
-            document.getElementById("braille-output").innerHTML = brailleHTML;
+            textOutput.textContent = englishText;
+            vibrateFeedback();
+        }
+
+        function speakText() {
+            const textToSpeak = textOutput.textContent || textInput.value;
+            if ('speechSynthesis' in window && textToSpeak) {
+                const utterance = new SpeechSynthesisUtterance(textToSpeak);
+                utterance.volume = 1;
+                utterance.rate = 0.8;
+                speechSynthesis.speak(utterance);
+            }
+            vibrateFeedback();
         }
     </script>
 </body>
